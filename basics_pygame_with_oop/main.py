@@ -1,3 +1,4 @@
+import math
 import random
 import sys
 
@@ -15,8 +16,9 @@ class Player():
         self.color = color
         self.next_step = {'x': 0, 'y': 0}
         self.bullets = []
+        self.missiles = []
 
-    def update(self, key_pressed, obs):
+    def update(self, key_pressed, mouse_pressed, obs):
             self.next_step = {'x': 0, 'y': 0}
 
             if key_pressed[pygame.K_UP]:
@@ -34,6 +36,10 @@ class Player():
             if key_pressed[pygame.K_SPACE]:
                 self.create_bullet()
 
+            if mouse_pressed[0]: # left mouse clicked
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                self.create_missile(mouse_x, mouse_y)
+
             self.rect.x += self.next_step['x']
             self.rect.y += self.next_step['y']
 
@@ -43,6 +49,9 @@ class Player():
 
             for bullet in self.bullets:
                 bullet.update()
+
+            for missile in self.missiles:
+                missile.update()
 
     def check_collision(self, obs):
         for ob in obs:
@@ -56,9 +65,25 @@ class Player():
         for bullet in self.bullets:
             bullet.draw(screen)
 
+        for missile in self.missiles:
+            missile.draw(screen)
+
     def create_bullet(self):
         bullet = Bullet(x=self.rect.centerx, y=self.rect.top - 10, size=10, direction='up', color='Yellow')
         self.bullets.append(bullet)
+
+    def create_missile(self, mouse_x, mouse_y):
+        missile = Missile(
+            x=self.rect.centerx,
+            y=self.rect.centery,
+            width=10,
+            height=10,
+            target_x=mouse_x,
+            target_y=mouse_y,
+            speed=10,
+            color='Blue'
+        )
+        self.missiles.append(missile)
 
 
 class Bullet():
@@ -78,6 +103,22 @@ class Bullet():
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
+
+class Missile():
+    def __init__(self, x, y, width, height, color, target_x, target_y, speed):
+        self.rect = pygame.Rect(x-width//2,y-height//2, width, height)
+        self.color = color
+        angle = math.atan2(target_y-y, target_x-x)
+        self.dx = math.cos(angle) * speed
+        self.dy = math.sin(angle) * speed
+
+    def update(self):
+        self.rect.x = self.rect.x + int(self.dx)
+        self.rect.y = self.rect.y + int(self.dy)
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
+
 
 class Obstacle():
     def __init__(self):
@@ -102,7 +143,7 @@ while True:
             pygame.quit()
             sys.exit()
 
-    player.update(pygame.key.get_pressed(), obs)
+    player.update(pygame.key.get_pressed(), pygame.mouse.get_pressed(), obs)
 
 
     screen.fill('Black')
