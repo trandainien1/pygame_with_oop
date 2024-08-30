@@ -1,3 +1,4 @@
+import random
 import sys
 
 import pygame
@@ -9,7 +10,9 @@ class Player():
         self.surfs = self.get_run_imgs(s=2, e=8, action='run')
         self.surf_index = 0
         self.rect = self.surfs[self.surf_index].get_rect(bottomleft=(100, 610))
-        self.gravity = 0
+        self.gravity = 1
+        self.jumping_height = 20
+        self.y_velocity = self.jumping_height
         self.is_jumping = False
 
     def get_run_imgs(self, s, e, action):
@@ -23,21 +26,30 @@ class Player():
 
     def update(self, key_pressed):
         if key_pressed[pygame.K_SPACE] and not self.is_jumping:
-            self.gravity = -20
-            self.surf_index = 0
             self.is_jumping = True
             self.surfs = self.jumping
             self.surf_index = 0
-        self.rect.y += self.gravity
 
-        if self.rect.bottom > 610:
-            if self.is_jumping:
+        if self.is_jumping:
+            self.rect.y -= self.y_velocity
+            self.y_velocity -= self.gravity
+            print(self.y_velocity, self.jumping_height)
+            if self.y_velocity < -self.jumping_height:
                 self.is_jumping = False
+                self.y_velocity = self.jumping_height
                 self.surfs = self.running
-                self.surf_index = 0
-            self.rect.y -= self.gravity
 
-        self.gravity += 1
+
+
+        # self.rect.y += self.gravity
+        # print('out', self.rect.y, self.gravity)
+        # if self.rect.bottom >= 540.0:
+        #     if self.is_jumping:
+        #         self.is_jumping = False
+        #         self.surfs = self.running
+        #         self.surf_index = 0
+        #     self.rect.y -= self.gravity
+        #     print('in', self.rect.y, self.gravity)
 
     def animate(self):
         self.surf_index += 1
@@ -78,8 +90,15 @@ class Cactus():
     def update(self):
         self.rect.x -= 6
 
+        if self.rect.x < 0:
+            self.rect.left = SCREEN_WIDTH
+            self.cactus_index = random.randint(0, 1)
+
     def draw(self, screen):
-        screen.blit(self.cactus[self.cactus_index], self.rect)
+        if self.cactus_index == 0:
+            screen.blit(self.cactus[self.cactus_index], self.rect)
+        else:
+            screen.blit(self.cactus[self.cactus_index], (self.rect.x, self.rect.y - 20))
 
 # initialize
 pygame.init()
