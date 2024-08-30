@@ -76,11 +76,16 @@ class Cactus():
         self.rect = self.cactus[self.cactus_index].get_rect(bottomright=(SCREEN_WIDTH, 610))
 
     def update(self):
+        global score, score_surf
+
         self.rect.x -= 6
 
         if self.rect.x < 0:
             self.rect.left = SCREEN_WIDTH
             self.cactus_index = random.randint(0, 1)
+
+            score += 1
+            score_surf = font.render(f'Score: {score}', False, 'Black')
 
     def draw(self, screen):
         if self.cactus_index == 0:
@@ -107,6 +112,8 @@ playing = True
 # Tạo font chữ
 font = pygame.font.Font(None, 40)
 text_surf = font.render('Press s to start the game', False, 'Black')
+score_surf = font.render('Score: 0', False, 'Black')
+score = 0
 
 # Events
 RUNNING_EVENT = pygame.USEREVENT + 1
@@ -138,10 +145,13 @@ while True:
         if player.rect.colliderect(cactus):
             playing = False
 
+
+
     screen.fill('White')
     background.draw(screen)
     player.draw(screen)
     cactus.draw(screen)
+    screen.blit(score_surf, (SCREEN_WIDTH//2 - score_surf.get_width()//2, 10))
 
     if not playing:
         screen.blit(text_surf, (SCREEN_WIDTH//2 - text_surf.get_width()//2, SCREEN_HEIGHT//2 - text_surf.get_height()//2))
