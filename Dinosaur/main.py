@@ -58,8 +58,8 @@ class Background():
         self.rect2 = self.surf2.get_rect(topleft=(self.rect.right - 10, 600))
 
     def update(self):
-        self.rect.x -= 6
-        self.rect2.x -= 6
+        self.rect.x -= 6 + score
+        self.rect2.x -= 6 + score
         if self.rect.right <= 0:
             self.rect.left = self.rect2.right - 10
         if self.rect2.right <= 0:
@@ -78,7 +78,7 @@ class Cactus():
     def update(self):
         global score, score_surf
 
-        self.rect.x -= 6
+        self.rect.x -= 6 + score
 
         if self.rect.x < 0:
             self.rect.left = SCREEN_WIDTH
@@ -132,19 +132,20 @@ while True:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_s:
                     cactus.reset_position()
+                    score = 0
+                    score_surf = font.render(f'Score: {score}', False, 'Black')
                     playing = True
 
 
     if playing:
         key_pressed = pygame.key.get_pressed()
 
-        background.update()
-        player.update(key_pressed)
-        cactus.update()
-
         if player.rect.colliderect(cactus):
             playing = False
 
+        background.update()
+        player.update(key_pressed)
+        cactus.update()
 
 
     screen.fill('White')
