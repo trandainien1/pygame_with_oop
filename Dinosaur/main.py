@@ -104,6 +104,9 @@ player = Player()
 background = Background()
 cactus = Cactus()
 playing = True
+# Tạo font chữ
+font = pygame.font.Font(None, 40)
+text_surf = font.render('Press s to start the game', False, 'Black')
 
 # Events
 RUNNING_EVENT = pygame.USEREVENT + 1
@@ -139,6 +142,9 @@ while True:
     background.draw(screen)
     player.draw(screen)
     cactus.draw(screen)
+
+    if not playing:
+        screen.blit(text_surf, (SCREEN_WIDTH//2 - text_surf.get_width()//2, SCREEN_HEIGHT//2 - text_surf.get_height()//2))
 
     pygame.display.update()
     clock.tick(60)
