@@ -39,18 +39,6 @@ class Player():
                 self.y_velocity = self.jumping_height
                 self.surfs = self.running
 
-
-
-        # self.rect.y += self.gravity
-        # print('out', self.rect.y, self.gravity)
-        # if self.rect.bottom >= 540.0:
-        #     if self.is_jumping:
-        #         self.is_jumping = False
-        #         self.surfs = self.running
-        #         self.surf_index = 0
-        #     self.rect.y -= self.gravity
-        #     print('in', self.rect.y, self.gravity)
-
     def animate(self):
         self.surf_index += 1
         if self.surf_index >= len(self.surfs):
@@ -100,6 +88,9 @@ class Cactus():
         else:
             screen.blit(self.cactus[self.cactus_index], (self.rect.x, self.rect.y - 20))
 
+    def reset_position(self):
+        self.rect.left = SCREEN_WIDTH
+
 # initialize
 pygame.init()
 pygame.display.set_caption('Dinosaur Game')
@@ -112,6 +103,7 @@ clock = pygame.time.Clock()
 player = Player()
 background = Background()
 cactus = Cactus()
+playing = True
 
 # Events
 RUNNING_EVENT = pygame.USEREVENT + 1
@@ -123,13 +115,25 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        if event.type == RUNNING_EVENT:
-            player.animate()
-    key_pressed = pygame.key.get_pressed()
+        if playing:
+            if event.type == RUNNING_EVENT:
+                player.animate()
+        else:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s:
+                    cactus.reset_position()
+                    playing = True
 
-    background.update()
-    player.update(key_pressed)
-    cactus.update()
+
+    if playing:
+        key_pressed = pygame.key.get_pressed()
+
+        background.update()
+        player.update(key_pressed)
+        cactus.update()
+
+        if player.rect.colliderect(cactus):
+            playing = False
 
     screen.fill('White')
     background.draw(screen)
