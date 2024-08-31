@@ -1,3 +1,4 @@
+import random
 import sys
 import pygame
 from pygame.image import load
@@ -55,6 +56,35 @@ class Bird():
     def draw(self, screen):
         screen.blit(self.rotate(self.surfs[self.surf_index//5]), self.rect)
 
+class Pipe():
+    def __init__(self):
+        self.surf = scale_by(load('assets/pipe-green.png'), factor=2)
+        self.flipped_surf = pygame.transform.flip(scale_by(load('assets/pipe-green.png'), factor=2), flip_y=True, flip_x=False)
+        self.rects = []
+        self.flipped_rects = []
+        self.heights = [450, 400, 350]
+        self.animation_speed = 3
+
+    def create_pipe(self):
+        height = random.choice(self.heights)
+        rect = self.surf.get_rect()
+        rect.x = SCREEN_WIDTH
+        rect.y = height
+        self.rects.append(rect)
+
+        flipped_rect = self.flipped_surf.get_rect(bottomleft=(SCREEN_WIDTH, rect.top - 200))
+        self.flipped_rects.append(flipped_rect)
+
+    def update(self):
+        for i in range(len(self.rects)):
+            self.rects[i].x -= self.animation_speed
+            self.flipped_rects[i].x -= self.animation_speed
+
+    def draw(self, screen):
+        for i in range(len(self.rects)):
+            screen.blit(self.surf, self.rects[i])
+            screen.blit(self.flipped_surf, self.flipped_rects[i])
+
 
 # Global variables
 SCREEN_WIDTH = 400
@@ -67,18 +97,27 @@ background_surf = scale_by(background_surf, factor=2)
 background_rect = background_surf.get_rect()
 floor = Floor()
 bird = Bird()
+pipe = Pipe()
+
+# Events
+SPAWN_PIPE_ENVENT = pygame.USEREVENT + 1
+pygame.time.set_timer(SPAWN_PIPE_ENVENT, 2000)
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == SPAWN_PIPE_ENVENT:
+            pipe.create_pipe()
     key_pressed = pygame.key.get_pressed()
 
     floor.update()
     bird.update(key_pressed)
+    pipe.update()
 
     screen.blit(background_surf, background_rect)
+    pipe.draw(screen)
     floor.draw(screen)
     bird.draw(screen)
 
