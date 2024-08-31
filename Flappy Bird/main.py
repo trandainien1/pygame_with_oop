@@ -5,6 +5,7 @@ from pygame.image import load
 from pygame.transform import scale_by
 
 pygame.init()
+pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=512)  # set up sound effect
 
 class Floor():
     def __init__(self):
@@ -25,6 +26,7 @@ class Floor():
             self.rects[i].x -= self.animation_speed
 
             if bird_rect.colliderect(self.rects[i]):
+                hitting_sound.play()
                 playing = False
 
             if self.rects[i].right < 0:
@@ -88,6 +90,7 @@ class Pipe():
 
             if bird_rect.colliderect(self.rects[i]) or bird_rect.colliderect(self.flipped_rects[i]):
                 playing = False
+                hitting_sound.play()
 
     def draw(self, screen):
         for i in range(len(self.rects)):
@@ -109,11 +112,17 @@ bird = Bird()
 pipe = Pipe()
 playing = True
 score = 0
-font = pygame.font.Font(None, 40)
-score_surf = font.render(f'Score: 0', False, 'White')
+font = pygame.font.Font('04B_19.TTF', 40)
+score_surf = font.render(f'0', False, 'White')
 score_rect = score_surf.get_rect(center=(SCREEN_WIDTH//2, 50))
 message_surf = scale_by(load('assets/message.png'), factor=2)
 message_rect = message_surf.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
+
+# Sounds
+point_sound = pygame.mixer.Sound('sound/sfx_point.wav')
+hitting_sound = pygame.mixer.Sound('sound/sfx_hit.wav')
+wing_sound = pygame.mixer.Sound('sound/sfx_wing.wav')
+
 
 # Events
 SPAWN_PIPE_ENVENT = pygame.USEREVENT + 1
@@ -125,16 +134,20 @@ while True:
             pygame.quit()
             sys.exit()
         if event.type == SPAWN_PIPE_ENVENT:
+            point_sound.play()
             score += 1
-            score_surf = font.render(f'Score: {score}', False, 'White')
+            score_surf = font.render(f'{score}', False, 'White')
             pipe.create_pipe()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                wing_sound.play()
         if not playing:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     bird = Bird()
                     pipe = Pipe()
                     score = 0
-                    score_surf = font.render(f'Score: 0', False, 'White')
+                    score_surf = font.render(f'0', False, 'White')
                     playing = True
 
     key_pressed = pygame.key.get_pressed()
